@@ -141,7 +141,8 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         modeHeader.label.style = 'font-weight: bold; font-size: 11px; color: #888;';
         this.menu.addMenuItem(modeHeader);
 
-        this._modeAutoItem = new PopupMenu.PopupMenuItem('  (*) Only Antigravity Always Awake');
+        this._modeAutoItem = new PopupMenu.PopupMenuItem('Only Antigravity Always Awake');
+        this._modeAutoItem.setOrnament(PopupMenu.Ornament.DOT);
         this._modeAutoItem.connect('activate', () => {
             if (this._proxy) {
                 this._proxy.SetModeRemote(0, () => this._refreshStatus());
@@ -151,7 +152,8 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         });
         this.menu.addMenuItem(this._modeAutoItem);
 
-        this._modeAlwaysItem = new PopupMenu.PopupMenuItem('  ( ) All Apps Awake');
+        this._modeAlwaysItem = new PopupMenu.PopupMenuItem('All Apps Awake');
+        this._modeAlwaysItem.setOrnament(PopupMenu.Ornament.NONE);
         this._modeAlwaysItem.connect('activate', () => {
             if (this._proxy) {
                 this._proxy.SetModeRemote(1, () => this._refreshStatus());
@@ -225,11 +227,11 @@ class KeepAwakeIndicator extends PanelMenu.Button {
                 this._masterSwitch.setToggleState(enabled);
 
                 if (mode === 0) {
-                    this._modeAutoItem.label.text = '  (*) Only Antigravity Always Awake';
-                    this._modeAlwaysItem.label.text = '  ( ) All Apps Awake';
+                    this._modeAutoItem.setOrnament(PopupMenu.Ornament.DOT);
+                    this._modeAlwaysItem.setOrnament(PopupMenu.Ornament.NONE);
                 } else {
-                    this._modeAutoItem.label.text = '  ( ) Only Antigravity Always Awake';
-                    this._modeAlwaysItem.label.text = '  (*) All Apps Awake';
+                    this._modeAutoItem.setOrnament(PopupMenu.Ornament.NONE);
+                    this._modeAlwaysItem.setOrnament(PopupMenu.Ornament.DOT);
                 }
 
                 // 3. Update Telemetry Rows
