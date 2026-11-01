@@ -55,9 +55,9 @@ class KeepAwakeIndicator extends PanelMenu.Button {
             track_hover: true,
         });
 
-        // Coffee Cup Vector Icon
+        // Coffee Cup Vector Icon (defaults to clean idle cup on launch)
         this._icon = new St.Icon({
-            gicon: getCoffeeIcon('coffee-active.svg'),
+            gicon: getCoffeeIcon('coffee-idle.svg'),
             style_class: 'system-status-icon',
             icon_size: 16,
             y_align: Clutter.ActorAlign.CENTER,
@@ -68,22 +68,35 @@ class KeepAwakeIndicator extends PanelMenu.Button {
 
         // Connect D-Bus Proxy
         this._proxy = null;
+        this._connecting = false;
         this._pollTimer = null;
         this._initDBus();
 
         // Build Popover Menu
         this._buildMenu();
+
+        // Periodic telemetry refresh every 2.5s
+        this._pollTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
+            this._refreshStatus();
+            return GLib.SOURCE_CONTINUE;
+        });
     }
 
     _initDBus() {
+        if (this._connecting) {
+            return;
+        }
+        this._connecting = true;
+
         try {
-            this._proxy = new KeepAwakeProxy(
+            new KeepAwakeProxy(
                 Gio.DBus.session,
                 DBUS_NAME,
                 DBUS_PATH,
                 (proxy, error) => {
+                    this._connecting = false;
                     if (error) {
-                        log(`[KeepAwake] D-Bus connection failed: ${error.message}`);
+                        this._proxy = null;
                         this._updateUIOffline();
                     } else {
                         this._proxy = proxy;
@@ -92,15 +105,10 @@ class KeepAwakeIndicator extends PanelMenu.Button {
                 }
             );
         } catch (e) {
-            log(`[KeepAwake] Exception creating proxy: ${e.message}`);
+            this._connecting = false;
+            this._proxy = null;
             this._updateUIOffline();
         }
-
-        // Periodic telemetry refresh every 2.5s
-        this._pollTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 3, () => {
-            this._refreshStatus();
-            return GLib.SOURCE_CONTINUE;
-        });
     }
 
     _buildMenu() {
@@ -121,6 +129,8 @@ class KeepAwakeIndicator extends PanelMenu.Button {
                         this._refreshStatus();
                     }
                 });
+            } else {
+                this._initDBus();
             }
         });
         this.menu.addMenuItem(this._masterSwitch);
@@ -135,6 +145,8 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         this._modeAutoItem.connect('activate', () => {
             if (this._proxy) {
                 this._proxy.SetModeRemote(0, () => this._refreshStatus());
+            } else {
+                this._initDBus();
             }
         });
         this.menu.addMenuItem(this._modeAutoItem);
@@ -143,6 +155,8 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         this._modeAlwaysItem.connect('activate', () => {
             if (this._proxy) {
                 this._proxy.SetModeRemote(1, () => this._refreshStatus());
+            } else {
+                this._initDBus();
             }
         });
         this.menu.addMenuItem(this._modeAlwaysItem);
@@ -172,12 +186,13 @@ class KeepAwakeIndicator extends PanelMenu.Button {
 
     _refreshStatus() {
         if (!this._proxy) {
-            this._updateUIOffline();
+            this._initDBus();
             return;
         }
 
         this._proxy.GetStatusRemote((result, error) => {
             if (error || !result) {
+                this._proxy = null;
                 this._updateUIOffline();
                 return;
             }
@@ -196,10 +211,13 @@ class KeepAwakeIndicator extends PanelMenu.Button {
 
                 // 1. Update Top Bar Coffee Cup Icon
                 if (!enabled) {
+                    // Disabled by user -> Slashed coffee cup
                     this._icon.gicon = getCoffeeIcon('coffee-disabled.svg');
-                } else if (inhibited) {
+                } else if (inhibited || actState === 'Active' || mode === 1) {
+                    // Active guarding -> Steaming warm golden coffee cup
                     this._icon.gicon = getCoffeeIcon('coffee-active.svg');
                 } else {
+                    // Enabled, waiting/idle -> Clean calm coffee cup (NO slash)
                     this._icon.gicon = getCoffeeIcon('coffee-idle.svg');
                 }
 

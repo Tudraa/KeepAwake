@@ -36,10 +36,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 5. Periodic tick task (every 3 seconds) for state evaluation & guardrails
     let svc_clone = service.clone();
+    let conn_clone = _conn.clone();
     let tick_handle = tokio::spawn(async move {
         let mut interval = tokio::time::interval(Duration::from_secs(3));
         loop {
             interval.tick().await;
+            if conn_clone.is_closed() {
+                error!("Session D-Bus connection closed. Exiting daemon so systemd can restart it.");
+                break;
+            }
             svc_clone.tick().await;
         }
     });

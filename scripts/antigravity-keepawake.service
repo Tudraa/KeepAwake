@@ -1,13 +1,14 @@
 [Unit]
 Description=Antigravity KeepAwake Daemon (Intelligent Laptop Sleep Prevention)
 Documentation=file:///home/martian/antigravity-keepawake/README.md
+PartOf=graphical-session.target
 After=graphical-session.target
 
 [Service]
 Type=simple
 ExecStart=%h/.local/bin/antigravity-keepawake
-Restart=on-failure
-RestartSec=3s
+Restart=always
+RestartSec=2s
 TimeoutStopSec=5s
 Environment=RUST_LOG=info
 
@@ -16,3 +17,4 @@ NoNewPrivileges=yes
 
 [Install]
 WantedBy=default.target
+WantedBy=graphical-session.target
