@@ -3,7 +3,6 @@
 [![Platform](https://img.shields.io/badge/Platform-Ubuntu%2022.04%20LTS-E95420?logo=ubuntu&logoColor=white)](https://ubuntu.com/)
 [![Desktop](https://img.shields.io/badge/Desktop-GNOME%20Shell%2042-4a154b?logo=gnome&logoColor=white)](https://www.gnome.org/)
 [![Rust](https://img.shields.io/badge/Rust-2021%20Edition-black?logo=rust&logoColor=white)](https://www.rust-lang.org/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Privileges](https://img.shields.io/badge/Privileges-Zero%20Sudo%20Required-success)](#zero-sudo-security-model)
 
 An intelligent closed-lid keep-awake daemon and GNOME Shell top bar indicator designed for developers running background AI coding workflows on Linux laptops.
@@ -315,8 +314,4 @@ This will:
     └── integration_tests.rs   # Integration tests & constraint checks
 ```
 
----
 
-## License
-
-Distributed under the MIT License. See `LICENSE` for details.
