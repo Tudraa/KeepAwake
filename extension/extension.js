@@ -1,13 +1,15 @@
 /* Antigravity KeepAwake GNOME Shell 42 Top Bar Extension
  *
- * Sits in the top bar beside the clock and communicates with the
- * Rust background daemon via Session D-Bus (`org.antigravity.KeepAwake`).
+ * Sits in the top bar right box (between Flameshot & Cloudflare WARP)
+ * and communicates with the Rust background daemon via Session D-Bus (`org.antigravity.KeepAwake`).
  */
 
 const { GObject, St, Clutter, Gio, GLib } = imports.gi;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
 
 const DBUS_NAME = 'org.antigravity.KeepAwake';
 const DBUS_PATH = '/org/antigravity/KeepAwake';
@@ -34,6 +36,12 @@ const KeepAwakeIface = `
 
 const KeepAwakeProxy = Gio.DBusProxy.makeProxyWrapper(KeepAwakeIface);
 
+function getCoffeeIcon(filename) {
+    let path = GLib.build_filenamev([Me.path, 'icons', filename]);
+    let file = Gio.File.new_for_path(path);
+    return new Gio.FileIcon({ file });
+}
+
 var KeepAwakeIndicator = GObject.registerClass(
 class KeepAwakeIndicator extends PanelMenu.Button {
     _init() {
@@ -47,10 +55,11 @@ class KeepAwakeIndicator extends PanelMenu.Button {
             track_hover: true,
         });
 
-        // Symbolic Icon (No emojis)
+        // Coffee Cup Vector Icon
         this._icon = new St.Icon({
-            icon_name: 'system-run-symbolic',
-            style_class: 'system-status-icon keepawake-icon-active',
+            gicon: getCoffeeIcon('coffee-active.svg'),
+            style_class: 'system-status-icon',
+            icon_size: 16,
             y_align: Clutter.ActorAlign.CENTER,
         });
 
@@ -95,7 +104,7 @@ class KeepAwakeIndicator extends PanelMenu.Button {
     }
 
     _buildMenu() {
-        // 1. Header Title (No emojis)
+        // 1. Header Title
         let titleItem = new PopupMenu.PopupMenuItem('Antigravity KeepAwake', {
             reactive: false,
         });
@@ -116,7 +125,7 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         });
         this.menu.addMenuItem(this._masterSwitch);
 
-        // 3. Operating Mode Section (English, No emojis)
+        // 3. Operating Mode Section
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         let modeHeader = new PopupMenu.PopupMenuItem('Operating Mode:', { reactive: false });
         modeHeader.label.style = 'font-weight: bold; font-size: 11px; color: #888;';
@@ -138,7 +147,7 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         });
         this.menu.addMenuItem(this._modeAlwaysItem);
 
-        // 4. Live System Telemetry (English, No emojis)
+        // 4. Live System Telemetry
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         let telemetryHeader = new PopupMenu.PopupMenuItem('SYSTEM TELEMETRY', { reactive: false });
         telemetryHeader.label.style_class = 'keepawake-telemetry-header';
@@ -185,16 +194,13 @@ class KeepAwakeIndicator extends PanelMenu.Button {
                 let tempC = statusDict['cpu_temp_c'] ? statusDict['cpu_temp_c'].deepUnpack() : 0.0;
                 let batteryPct = statusDict['battery_pct'] ? statusDict['battery_pct'].deepUnpack() : 100;
 
-                // 1. Update Top Bar Symbolic Icon
+                // 1. Update Top Bar Coffee Cup Icon
                 if (!enabled) {
-                    this._icon.icon_name = 'process-stop-symbolic';
-                    this._icon.style_class = 'system-status-icon keepawake-icon-disabled';
+                    this._icon.gicon = getCoffeeIcon('coffee-disabled.svg');
                 } else if (inhibited) {
-                    this._icon.icon_name = 'system-run-symbolic';
-                    this._icon.style_class = 'system-status-icon keepawake-icon-active';
+                    this._icon.gicon = getCoffeeIcon('coffee-active.svg');
                 } else {
-                    this._icon.icon_name = 'weather-clear-night-symbolic';
-                    this._icon.style_class = 'system-status-icon keepawake-icon-idle';
+                    this._icon.gicon = getCoffeeIcon('coffee-idle.svg');
                 }
 
                 // 2. Update Switches & Radio Options
@@ -208,7 +214,7 @@ class KeepAwakeIndicator extends PanelMenu.Button {
                     this._modeAlwaysItem.label.text = '  (*) All Apps Awake';
                 }
 
-                // 3. Update Telemetry Rows (English, Clean formatting)
+                // 3. Update Telemetry Rows
                 let actText = actState;
                 if (actState === 'GracePeriod') {
                     actText = `Grace Period (${remaining}s)`;
@@ -224,8 +230,7 @@ class KeepAwakeIndicator extends PanelMenu.Button {
     }
 
     _updateUIOffline() {
-        this._icon.icon_name = 'process-stop-symbolic';
-        this._icon.style_class = 'system-status-icon keepawake-icon-disabled';
+        this._icon.gicon = getCoffeeIcon('coffee-disabled.svg');
         this._statusRow.label.text = 'Agent Status: Daemon Offline';
     }
 
@@ -246,8 +251,8 @@ function init() {
 
 function enable() {
     indicator = new KeepAwakeIndicator();
-    // Place right beside clock in centerBox
-    Main.panel.addToStatusArea('antigravity-keepawake', indicator, 1, 'center');
+    // Place in right box among the tray indicators (between Flameshot & WARP)
+    Main.panel.addToStatusArea('antigravity-keepawake', indicator, 1, 'right');
 }
 
 function disable() {

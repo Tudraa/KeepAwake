@@ -45,7 +45,7 @@ BIN_DIR="$HOME/.local/bin"
 EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/$UUID"
 SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 
-mkdir -p "$BIN_DIR" "$EXTENSION_DIR/schemas" "$SYSTEMD_USER_DIR"
+mkdir -p "$BIN_DIR" "$EXTENSION_DIR/schemas" "$EXTENSION_DIR/icons" "$SYSTEMD_USER_DIR"
 
 # 4. Install native binary
 echo "Installing daemon binary to $BIN_DIR/antigravity-keepawake..."
@@ -62,6 +62,7 @@ if [ "$DRY_RUN" = false ]; then
     cp -f "$ROOT_DIR/extension/metadata.json" "$EXTENSION_DIR/"
     cp -f "$ROOT_DIR/extension/extension.js" "$EXTENSION_DIR/"
     cp -f "$ROOT_DIR/extension/stylesheet.css" "$EXTENSION_DIR/"
+    cp -rf "$ROOT_DIR/extension/icons/"* "$EXTENSION_DIR/icons/"
 
     # Compile GSettings schema inside extension directory
     cp -f "$ROOT_DIR/schemas/org.gnome.shell.extensions.antigravity-keepawake.gschema.xml" "$EXTENSION_DIR/schemas/"

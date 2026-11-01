@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <!-- Steam plumes -->
+  <path d="M4.5 1C4 2 5 2.5 4.5 3.5" stroke="#F6D32D" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M7.5 0.5C7 1.5 8 2 7.5 3.5" stroke="#F6D32D" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M10.5 1C10 2 11 2.5 10.5 3.5" stroke="#F6D32D" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Cup body -->
+  <path d="M2 5H12V9.5C12 11.433 10.433 13 8.5 13H5.5C3.567 13 2 11.433 2 9.5V5Z" fill="#F6D32D"/>
+  <!-- Cup handle -->
+  <path d="M12 6.5H13.5C14.328 6.5 15 7.172 15 8V8.5C15 9.328 14.328 10 13.5 10H12" stroke="#F6D32D" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Saucer -->
+  <path d="M1.5 14.5H13.5" stroke="#F6D32D" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
