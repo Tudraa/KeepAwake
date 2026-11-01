@@ -14,9 +14,10 @@ use crate::thermal_guard::{HardwareSafetyVerdict, ThermalBatteryGuard};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
+use std::time::Instant;
 use sysinfo::System;
 use tokio::sync::Mutex;
-use tracing::{info, warn};
+use tracing::{debug, info, warn};
 use zbus::zvariant::OwnedValue;
 
 pub const MODE_AUTO: u32 = 0;
@@ -33,6 +34,7 @@ pub struct KeepAwakeService {
     thermal_guard: Arc<ThermalBatteryGuard>,
     sys: Arc<Mutex<System>>,
     last_lid_state: Arc<AtomicBool>,
+    last_suspend_time: Arc<Mutex<Option<Instant>>>,
 }
 
 impl KeepAwakeService {
@@ -52,6 +54,7 @@ impl KeepAwakeService {
             thermal_guard,
             sys,
             last_lid_state: Arc::new(AtomicBool::new(false)),
+            last_suspend_time: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -70,7 +73,24 @@ impl KeepAwakeService {
             thermal_guard,
             sys: Arc::new(Mutex::new(System::new_all())),
             last_lid_state: Arc::new(AtomicBool::new(false)),
+            last_suspend_time: Arc::new(Mutex::new(None)),
         }
+    }
+
+    async fn can_trigger_suspend(&self) -> bool {
+        let guard = self.last_suspend_time.lock().await;
+        if let Some(last) = *guard
+            && last.elapsed() < std::time::Duration::from_secs(60)
+        {
+            debug!("Suspend suppressed: currently in 60s post-suspend cooldown.");
+            return false;
+        }
+        true
+    }
+
+    async fn mark_suspend_triggered(&self) {
+        let mut guard = self.last_suspend_time.lock().await;
+        *guard = Some(Instant::now());
     }
 
     /// Primary reactive evaluation tick called whenever an event occurs.
@@ -93,20 +113,45 @@ impl KeepAwakeService {
         }
 
         // Check Hardware Safety Guardrails
+        // NOTE: KeepAwake's responsibility is solely closed-lid power management.
+        // If the lid is OPEN, the user is actively at their laptop; KeepAwake must NEVER
+        // trigger an unprompted suspend while the lid is open!
         match self.thermal_guard.evaluate() {
             HardwareSafetyVerdict::CriticalBattery { battery_pct } => {
-                warn!("Battery critical ({battery_pct}%): Triggering emergency suspend protocol.");
-                self.freezer.pre_suspend_thaw().await;
-                let _ = self.inhibitor.release().await;
-                let _ = self.inhibitor.trigger_suspend().await;
-                return;
+                if lid_closed {
+                    if self.can_trigger_suspend().await {
+                        warn!(
+                            "Battery critical ({battery_pct}%) with lid closed: Triggering emergency suspend protocol."
+                        );
+                        self.freezer.pre_suspend_thaw().await;
+                        let _ = self.inhibitor.release().await;
+                        let _ = self.inhibitor.trigger_suspend().await;
+                        self.mark_suspend_triggered().await;
+                    }
+                    return;
+                } else {
+                    debug!(
+                        "Battery low ({battery_pct}%), but lid is open. System desktop alerts apply."
+                    );
+                }
             }
             HardwareSafetyVerdict::CriticalThermal { temp_c } => {
-                warn!("Thermal critical ({temp_c}°C): Triggering emergency suspend protocol.");
-                self.freezer.pre_suspend_thaw().await;
-                let _ = self.inhibitor.release().await;
-                let _ = self.inhibitor.trigger_suspend().await;
-                return;
+                if lid_closed {
+                    if self.can_trigger_suspend().await {
+                        warn!(
+                            "Thermal critical ({temp_c}°C) with lid closed: Triggering emergency suspend protocol."
+                        );
+                        self.freezer.pre_suspend_thaw().await;
+                        let _ = self.inhibitor.release().await;
+                        let _ = self.inhibitor.trigger_suspend().await;
+                        self.mark_suspend_triggered().await;
+                    }
+                    return;
+                } else {
+                    debug!(
+                        "Thermal high ({temp_c}°C), but lid is open. Internal laptop fans managing cooling."
+                    );
+                }
             }
             HardwareSafetyVerdict::ThermalThrottle { .. } => {
                 // Warning stage (nice deprioritization handled if needed)
@@ -147,12 +192,15 @@ impl KeepAwakeService {
                         if self.inhibitor.is_inhibited() {
                             info!("Antigravity task completed and grace period expired.");
                             if lid_closed {
-                                info!(
-                                    "Lid is closed: Executing Clean Transition Protocol to Deep Sleep."
-                                );
-                                self.freezer.pre_suspend_thaw().await;
-                                let _ = self.inhibitor.release().await;
-                                let _ = self.inhibitor.trigger_suspend().await;
+                                if self.can_trigger_suspend().await {
+                                    info!(
+                                        "Lid is closed: Executing Clean Transition Protocol to Deep Sleep."
+                                    );
+                                    self.freezer.pre_suspend_thaw().await;
+                                    let _ = self.inhibitor.release().await;
+                                    let _ = self.inhibitor.trigger_suspend().await;
+                                    self.mark_suspend_triggered().await;
+                                }
                             } else {
                                 let _ = self.inhibitor.release().await;
                                 self.freezer.thaw_all();
@@ -280,5 +328,22 @@ mod tests {
         assert!(service.enabled.load(Ordering::SeqCst));
         assert_eq!(service.mode.load(Ordering::SeqCst), MODE_ALWAYS_ON);
         assert_eq!(service.ping(), "pong");
+    }
+
+    #[tokio::test]
+    async fn test_service_never_suspends_when_lid_open_even_under_critical_thermal() {
+        let freezer = Freezer::new();
+        let inhibitor = SleepInhibitor::with_connection(None);
+        let sentinel = ActivitySentinel::new(None, 2);
+        // Force critical thermal with 0.0 threshold
+        let thermal = Arc::new(ThermalBatteryGuard::new(12, 0.0, 0.0));
+
+        let service = KeepAwakeService::with_components(freezer, inhibitor, sentinel, thermal);
+
+        // Tick with open lid
+        service.tick().await;
+
+        // Verify that suspend was NEVER triggered because lid is open
+        assert!(service.last_suspend_time.lock().await.is_none());
     }
 }

@@ -113,10 +113,10 @@ impl Freezer {
             if kill(Pid::from_raw(pid as i32), Signal::SIGCONT).is_ok() {
                 count += 1;
             }
+            global_guard.remove(&pid);
         }
 
         frozen_guard.clear();
-        global_guard.clear();
 
         let elapsed = start.elapsed().as_micros();
         (count, elapsed)

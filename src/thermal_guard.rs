@@ -11,8 +11,8 @@ use std::path::Path;
 use tracing::{debug, warn};
 
 pub const BATTERY_FLOOR_PERCENT: u32 = 12;
-pub const THERMAL_THROTTLE_CELSIUS: f32 = 75.0;
-pub const THERMAL_EMERGENCY_CELSIUS: f32 = 80.0;
+pub const THERMAL_THROTTLE_CELSIUS: f32 = 88.0;
+pub const THERMAL_EMERGENCY_CELSIUS: f32 = 95.0;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum HardwareSafetyVerdict {
