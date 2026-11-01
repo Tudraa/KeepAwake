@@ -1,0 +1,12 @@
+{
+  "uuid": "antigravity-keepawake@antigravity.org",
+  "name": "Antigravity KeepAwake",
+  "description": "Keeps your laptop awake while Antigravity is active with the lid closed. Freezes heavy apps and auto-sleeps on completion.",
+  "shell-version": [
+    "42",
+    "42.5",
+    "42.9"
+  ],
+  "url": "https://github.com/martian/antigravity-keepawake",
+  "version": 1
+}

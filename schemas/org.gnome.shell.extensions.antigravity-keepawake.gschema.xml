@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.antigravity-keepawake" path="/org/gnome/shell/extensions/antigravity-keepawake/">
+    <key name="master-enabled" type="b">
+      <default>true</default>
+      <summary>Master Switch</summary>
+      <description>Master enable or disable toggle switch for Antigravity KeepAwake</description>
+    </key>
+    <key name="mode" type="u">
+      <default>0</default>
+      <summary>Operating Mode</summary>
+      <description>0: Auto (follows Antigravity activity), 1: Always Keep Awake, 2: Disabled</description>
+    </key>
+    <key name="grace-period-seconds" type="u">
+      <default>120</default>
+      <summary>Grace Period Duration</summary>
+      <description>Countdown in seconds after Antigravity finishes task before allowing sleep</description>
+    </key>
+    <key name="audio-chime-enabled" type="b">
+      <default>true</default>
+      <summary>Audio Ping Chime</summary>
+      <description>Play a subtle chime sound when Antigravity finishes a task</description>
+    </key>
+    <key name="target-apps" type="as">
+      <default>['google-chrome', 'chrome', 'chromium', 'brave', 'firefox', 'slack', 'discord', 'spotify']</default>
+      <summary>Class 2 Frozen Applications</summary>
+      <description>Process names targeted for SIGSTOP when laptop lid is closed</description>
+    </key>
+  </schema>
+</schemalist>

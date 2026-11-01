@@ -1,0 +1,46 @@
+/* Antigravity KeepAwake GNOME Shell 42 Top Bar Styles */
+
+.keepawake-panel-box {
+    spacing: 4px;
+}
+
+.keepawake-icon {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.keepawake-icon-active {
+    color: #e5a50a; /* Amber/gold bolt */
+}
+
+.keepawake-icon-idle {
+    color: #9a9996; /* Muted gray moon/sleep */
+}
+
+.keepawake-icon-disabled {
+    color: #e01b24; /* Red stop */
+}
+
+.keepawake-telemetry-header {
+    font-weight: bold;
+    font-size: 11px;
+    color: #77767b;
+    padding: 6px 12px 2px 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.keepawake-telemetry-row {
+    padding: 4px 12px;
+    font-size: 12px;
+}
+
+.keepawake-badge-active {
+    color: #e5a50a;
+    font-weight: bold;
+}
+
+.keepawake-badge-idle {
+    color: #33d17a;
+    font-weight: bold;
+}
