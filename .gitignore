@@ -1,6 +1,26 @@
+# Rust build artifacts
 /target
 **/*.rs.bk
+
+# IDE, editor & OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
+
+# Internal agent planning & tasks
+PRD.md
+CONSTRAINTS.md
+tasks/
+.agents/
+.gemini/
+
+# GNOME extension compiled schemas
+gschemas.compiled
+*.compiled
+
+# Python caches
 __pycache__/
 *.py[cod]
-*.compiled
