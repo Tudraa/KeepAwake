@@ -197,11 +197,9 @@ Restart GNOME Shell directly without logging out:
 
 ### Top Bar Indicator
 
-Once activated, a custom vector coffee cup icon appears in your Ubuntu top right panel:
-
-- ☕ **Warm Amber Coffee Cup**: Keep-awake active (inhibitor engaged, lid-switch blocked).
-- ☕ **Muted Gray Coffee Cup**: Keep-awake idle (waiting for Antigravity task or lid closed).
-- ☕ **Slashed Coffee Cup**: Disabled or daemon offline.
+- ☕ **Gray Cup with Yellow Steam** (`coffee-antigravity.svg`): Displayed in `Only Antigravity Always Awake` mode (steam plumes glow yellow for agent activity, while the cup body remains calm neutral gray).
+- ☕ **Full Golden Yellow Cup** (`coffee-active.svg`): Displayed in `All Apps Awake` mode (entire cup, handle, saucer, and steam glow warm yellow).
+- ☕ **Slashed Dark Cup** (`coffee-disabled.svg`): Master switch disabled or daemon offline.
 
 ### Popover Menu
 
@@ -303,9 +301,10 @@ This will:
 │   ├── metadata.json          # Extension manifest & GNOME version specs
 │   ├── stylesheet.css         # UI styling
 │   └── icons/                 # Custom SVG status icons
-│       ├── coffee-active.svg
-│       ├── coffee-idle.svg
-│       └── coffee-disabled.svg
+│       ├── coffee-active.svg      # All Apps Awake (all yellow)
+│       ├── coffee-antigravity.svg # Only Antigravity (yellow steam, gray cup)
+│       ├── coffee-idle.svg        # Idle cup (no steam)
+│       └── coffee-disabled.svg    # Disabled (red slash)
 ├── schemas/                   # GSettings schema configuration
 │   └── org.gnome.shell.extensions.antigravity-keepawake.gschema.xml
 ├── scripts/                   # User-space scripts

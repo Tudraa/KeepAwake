@@ -215,12 +215,12 @@ class KeepAwakeIndicator extends PanelMenu.Button {
                 if (!enabled) {
                     // Disabled by user -> Slashed coffee cup
                     this._icon.gicon = getCoffeeIcon('coffee-disabled.svg');
-                } else if (inhibited || actState === 'Active' || mode === 1) {
-                    // Active guarding -> Steaming warm golden coffee cup
+                } else if (mode === 1) {
+                    // All Apps Awake -> Entire cup and steam glowing warm yellow
                     this._icon.gicon = getCoffeeIcon('coffee-active.svg');
                 } else {
-                    // Enabled, waiting/idle -> Clean calm coffee cup (NO slash)
-                    this._icon.gicon = getCoffeeIcon('coffee-idle.svg');
+                    // Only Antigravity Always Awake -> Steam plumes yellow, cup body stays gray
+                    this._icon.gicon = getCoffeeIcon('coffee-antigravity.svg');
                 }
 
                 // 2. Update Switches & Radio Options
