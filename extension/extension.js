@@ -39,7 +39,7 @@ class KeepAwakeIndicator extends PanelMenu.Button {
     _init() {
         super._init(0.5, 'Antigravity KeepAwake', false);
 
-        // Panel Label / Icon container
+        // Panel Container
         this._box = new St.BoxLayout({
             style_class: 'keepawake-panel-box',
             reactive: true,
@@ -47,13 +47,14 @@ class KeepAwakeIndicator extends PanelMenu.Button {
             track_hover: true,
         });
 
-        this._iconLabel = new St.Label({
-            text: '⚡',
+        // Symbolic Icon (No emojis)
+        this._icon = new St.Icon({
+            icon_name: 'system-run-symbolic',
+            style_class: 'system-status-icon keepawake-icon-active',
             y_align: Clutter.ActorAlign.CENTER,
-            style_class: 'keepawake-icon keepawake-icon-active',
         });
 
-        this._box.add_child(this._iconLabel);
+        this._box.add_child(this._icon);
         this.add_child(this._box);
 
         // Connect D-Bus Proxy
@@ -94,8 +95,8 @@ class KeepAwakeIndicator extends PanelMenu.Button {
     }
 
     _buildMenu() {
-        // 1. Header Title
-        let titleItem = new PopupMenu.PopupMenuItem('🚀 Antigravity KeepAwake', {
+        // 1. Header Title (No emojis)
+        let titleItem = new PopupMenu.PopupMenuItem('Antigravity KeepAwake', {
             reactive: false,
         });
         titleItem.label.style = 'font-weight: bold; font-size: 13px;';
@@ -115,13 +116,13 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         });
         this.menu.addMenuItem(this._masterSwitch);
 
-        // 3. Mode Radio Section
+        // 3. Operating Mode Section (English, No emojis)
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        let modeHeader = new PopupMenu.PopupMenuItem('Pilihan Mode:', { reactive: false });
+        let modeHeader = new PopupMenu.PopupMenuItem('Operating Mode:', { reactive: false });
         modeHeader.label.style = 'font-weight: bold; font-size: 11px; color: #888;';
         this.menu.addMenuItem(modeHeader);
 
-        this._modeAutoItem = new PopupMenu.PopupMenuItem('  ⦿ Mode Otomatis (Ikut Antigravity)');
+        this._modeAutoItem = new PopupMenu.PopupMenuItem('  (*) Only Antigravity Always Awake');
         this._modeAutoItem.connect('activate', () => {
             if (this._proxy) {
                 this._proxy.SetModeRemote(0, () => this._refreshStatus());
@@ -129,7 +130,7 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         });
         this.menu.addMenuItem(this._modeAutoItem);
 
-        this._modeAlwaysItem = new PopupMenu.PopupMenuItem('  ○ Selalu Terjaga (Always Awake)');
+        this._modeAlwaysItem = new PopupMenu.PopupMenuItem('  ( ) All Apps Awake');
         this._modeAlwaysItem.connect('activate', () => {
             if (this._proxy) {
                 this._proxy.SetModeRemote(1, () => this._refreshStatus());
@@ -137,25 +138,25 @@ class KeepAwakeIndicator extends PanelMenu.Button {
         });
         this.menu.addMenuItem(this._modeAlwaysItem);
 
-        // 4. Live Telemetry
+        // 4. Live System Telemetry (English, No emojis)
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        let telemetryHeader = new PopupMenu.PopupMenuItem('TELEMETRI SISTEM', { reactive: false });
+        let telemetryHeader = new PopupMenu.PopupMenuItem('SYSTEM TELEMETRY', { reactive: false });
         telemetryHeader.label.style_class = 'keepawake-telemetry-header';
         this.menu.addMenuItem(telemetryHeader);
 
-        this._statusRow = new PopupMenu.PopupMenuItem('Status Agen: Memeriksa...', { reactive: false });
+        this._statusRow = new PopupMenu.PopupMenuItem('Agent Status: Checking...', { reactive: false });
         this._statusRow.label.style_class = 'keepawake-telemetry-row';
         this.menu.addMenuItem(this._statusRow);
 
-        this._lidRow = new PopupMenu.PopupMenuItem('Engsel Layar: Terbuka', { reactive: false });
+        this._lidRow = new PopupMenu.PopupMenuItem('Laptop Lid: Open', { reactive: false });
         this._lidRow.label.style_class = 'keepawake-telemetry-row';
         this.menu.addMenuItem(this._lidRow);
 
-        this._frozenRow = new PopupMenu.PopupMenuItem('Aplikasi Dibekukan: 0 proses', { reactive: false });
+        this._frozenRow = new PopupMenu.PopupMenuItem('Frozen Apps: 0 processes', { reactive: false });
         this._frozenRow.label.style_class = 'keepawake-telemetry-row';
         this.menu.addMenuItem(this._frozenRow);
 
-        this._hardwareRow = new PopupMenu.PopupMenuItem('Suhu & Baterai: --°C | --%', { reactive: false });
+        this._hardwareRow = new PopupMenu.PopupMenuItem('Hardware: --°C | --%', { reactive: false });
         this._hardwareRow.label.style_class = 'keepawake-telemetry-row';
         this.menu.addMenuItem(this._hardwareRow);
     }
@@ -184,38 +185,38 @@ class KeepAwakeIndicator extends PanelMenu.Button {
                 let tempC = statusDict['cpu_temp_c'] ? statusDict['cpu_temp_c'].deepUnpack() : 0.0;
                 let batteryPct = statusDict['battery_pct'] ? statusDict['battery_pct'].deepUnpack() : 100;
 
-                // 1. Update Top Bar Icon
+                // 1. Update Top Bar Symbolic Icon
                 if (!enabled) {
-                    this._iconLabel.text = '🛑';
-                    this._iconLabel.style_class = 'keepawake-icon keepawake-icon-disabled';
+                    this._icon.icon_name = 'process-stop-symbolic';
+                    this._icon.style_class = 'system-status-icon keepawake-icon-disabled';
                 } else if (inhibited) {
-                    this._iconLabel.text = '⚡';
-                    this._iconLabel.style_class = 'keepawake-icon keepawake-icon-active';
+                    this._icon.icon_name = 'system-run-symbolic';
+                    this._icon.style_class = 'system-status-icon keepawake-icon-active';
                 } else {
-                    this._iconLabel.text = '💤';
-                    this._iconLabel.style_class = 'keepawake-icon keepawake-icon-idle';
+                    this._icon.icon_name = 'weather-clear-night-symbolic';
+                    this._icon.style_class = 'system-status-icon keepawake-icon-idle';
                 }
 
-                // 2. Update Switches & Radio
+                // 2. Update Switches & Radio Options
                 this._masterSwitch.setToggleState(enabled);
 
                 if (mode === 0) {
-                    this._modeAutoItem.label.text = '  ⦿ Mode Otomatis (Ikut Antigravity)';
-                    this._modeAlwaysItem.label.text = '  ○ Selalu Terjaga (Always Awake)';
+                    this._modeAutoItem.label.text = '  (*) Only Antigravity Always Awake';
+                    this._modeAlwaysItem.label.text = '  ( ) All Apps Awake';
                 } else {
-                    this._modeAutoItem.label.text = '  ○ Mode Otomatis (Ikut Antigravity)';
-                    this._modeAlwaysItem.label.text = '  ⦿ Selalu Terjaga (Always Awake)';
+                    this._modeAutoItem.label.text = '  ( ) Only Antigravity Always Awake';
+                    this._modeAlwaysItem.label.text = '  (*) All Apps Awake';
                 }
 
-                // 3. Update Telemetry
+                // 3. Update Telemetry Rows (English, Clean formatting)
                 let actText = actState;
                 if (actState === 'GracePeriod') {
-                    actText = `Masa Tenggang (${remaining}s)`;
+                    actText = `Grace Period (${remaining}s)`;
                 }
-                this._statusRow.label.text = `Status Agen: ${actText}`;
-                this._lidRow.label.text = `Engsel Layar: ${lidClosed ? 'Tertutup (Locked)' : 'Terbuka'}`;
-                this._frozenRow.label.text = `Aplikasi Dibekukan: ${frozenCount} proses`;
-                this._hardwareRow.label.text = `Suhu & Baterai: ${tempC.toFixed(1)}°C | ${batteryPct}%`;
+                this._statusRow.label.text = `Agent Status: ${actText}`;
+                this._lidRow.label.text = `Laptop Lid: ${lidClosed ? 'Closed (Inhibited)' : 'Open'}`;
+                this._frozenRow.label.text = `Frozen Apps: ${frozenCount} processes`;
+                this._hardwareRow.label.text = `Hardware: ${tempC.toFixed(1)}°C | ${batteryPct}%`;
             } catch (e) {
                 log(`[KeepAwake] Error parsing status dict: ${e.message}`);
             }
@@ -223,9 +224,9 @@ class KeepAwakeIndicator extends PanelMenu.Button {
     }
 
     _updateUIOffline() {
-        this._iconLabel.text = '🛑';
-        this._iconLabel.style_class = 'keepawake-icon keepawake-icon-disabled';
-        this._statusRow.label.text = 'Status Agen: Daemon Offline';
+        this._icon.icon_name = 'process-stop-symbolic';
+        this._icon.style_class = 'system-status-icon keepawake-icon-disabled';
+        this._statusRow.label.text = 'Agent Status: Daemon Offline';
     }
 
     destroy() {

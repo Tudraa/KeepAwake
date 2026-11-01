@@ -18,8 +18,8 @@ for arg in "$@"; do
     esac
 done
 
-echo "🚀 [Antigravity KeepAwake] Installing local components..."
-echo "📂 Root Directory: $ROOT_DIR"
+echo "[Antigravity KeepAwake] Installing local components..."
+echo "Root Directory: $ROOT_DIR"
 
 # 1. Ensure Rust toolchain is available
 if [ -f "$HOME/.cargo/env" ]; then
@@ -28,12 +28,12 @@ if [ -f "$HOME/.cargo/env" ]; then
 fi
 
 command -v cargo >/dev/null 2>&1 || {
-    echo "❌ Error: cargo not found. Please install Rust via rustup." >&2
+    echo "Error: cargo not found. Please install Rust via rustup." >&2
     exit 1
 }
 
 # 2. Compile release binary
-echo "🔨 Compiling Rust daemon (release mode)..."
+echo "Compiling Rust daemon (release mode)..."
 if [ "$DRY_RUN" = false ]; then
     (cd "$ROOT_DIR" && cargo build --release)
 else
@@ -48,7 +48,7 @@ SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 mkdir -p "$BIN_DIR" "$EXTENSION_DIR/schemas" "$SYSTEMD_USER_DIR"
 
 # 4. Install native binary
-echo "📦 Installing daemon binary to $BIN_DIR/antigravity-keepawake..."
+echo "Installing daemon binary to $BIN_DIR/antigravity-keepawake..."
 if [ "$DRY_RUN" = false ]; then
     cp -f "$ROOT_DIR/target/release/antigravity-keepawake" "$BIN_DIR/antigravity-keepawake"
     chmod +x "$BIN_DIR/antigravity-keepawake"
@@ -57,7 +57,7 @@ else
 fi
 
 # 5. Install GNOME Shell Extension
-echo "🧩 Installing GNOME Shell Extension to $EXTENSION_DIR..."
+echo "Installing GNOME Shell Extension to $EXTENSION_DIR..."
 if [ "$DRY_RUN" = false ]; then
     cp -f "$ROOT_DIR/extension/metadata.json" "$EXTENSION_DIR/"
     cp -f "$ROOT_DIR/extension/extension.js" "$EXTENSION_DIR/"
@@ -71,24 +71,24 @@ else
 fi
 
 # 6. Install and enable systemd user service
-echo "⚙️ Installing systemd --user service..."
+echo "Installing systemd --user service..."
 if [ "$DRY_RUN" = false ]; then
     cp -f "$ROOT_DIR/scripts/antigravity-keepawake.service" "$SYSTEMD_USER_DIR/"
     systemctl --user daemon-reload
     systemctl --user enable antigravity-keepawake.service
-    systemctl --user restart antigravity-keepawake.service || echo "⚠️ Warning: systemctl restart returned non-zero (daemon may need active session)"
+    systemctl --user restart antigravity-keepawake.service || echo "Warning: systemctl restart returned non-zero (daemon may need active session)"
 else
     echo "   [dry-run] cp antigravity-keepawake.service -> $SYSTEMD_USER_DIR"
 fi
 
 # 7. Enable GNOME Extension if gnome-extensions CLI exists
 if command -v gnome-extensions >/dev/null 2>&1; then
-    echo "🔌 Enabling GNOME extension $UUID..."
+    echo "Enabling GNOME extension $UUID..."
     if [ "$DRY_RUN" = false ]; then
-        gnome-extensions enable "$UUID" 2>/dev/null || echo "ℹ️ Extension enabled or queued for next Shell reload."
+        gnome-extensions enable "$UUID" 2>/dev/null || echo "Info: Extension enabled or queued for next Shell reload."
     fi
 fi
 
-echo "✅ [Antigravity KeepAwake] Installation complete!"
+echo "[Antigravity KeepAwake] Installation complete."
 echo "   Daemon status: systemctl --user status antigravity-keepawake.service"
 echo "   Logs: journalctl --user -u antigravity-keepawake -f"

@@ -1,25 +1,26 @@
-# 🚀 Antigravity KeepAwake (Rust Edition)
+# Antigravity KeepAwake (Rust Edition)
 
 A high-performance, ultra-lightweight Ubuntu Top Bar (GNOME Shell 42) extension and Rust daemon that keeps your laptop awake while Antigravity runs tasks with the lid closed.
 
 ---
 
-## 🎯 Key Features
+## Key Features
 - **Lid-Closed Execution**: Prevents `systemd-logind` from suspending when the laptop lid is closed while Antigravity is active using D-Bus `Inhibit` locks.
-- **Top Bar Integration**: Toggle switch and real-time status telemetry (⚡ Running, 💤 Idle, 🛑 Suspended) right beside the Ubuntu clock.
-- **Auto-Sleep on Completion**: Automatically releases the inhibitor lock after a configurable 2-minute grace period and transitions cleanly to sleep (`systemctl suspend`).
+- **Top Bar Integration**: Toggle switch and real-time status telemetry right beside the Ubuntu clock.
+  - **Only Antigravity Always Awake** (Mode 0): Keeps system awake only while Antigravity is active, freezes external apps, and auto-sleeps 2 minutes after task completion.
+  - **All Apps Awake** (Mode 1): Keeps system and all applications continuously awake without auto-sleep.
 - **Smart Resource Throttling (3-Class Taxonomy)**:
   - **Class 0 (Golden Whitelist)**: Absolute immunity for GNOME Shell, Wayland, PipeWire, D-Bus, and systemd.
   - **Class 1 (Antigravity Tree)**: Recursive tree-walk protection for the IDE and all child compilers, test runners, and tooling.
   - **Class 2 (External Heavy Apps)**: Freezes non-essential apps (e.g., Chrome, Spotify, Discord) via `SIGSTOP` while lid is closed, and thaws them via `SIGCONT` on lid open.
 - **Hardware Safeguards**:
-  - Battery floor cutoff at $\le$ 12% to prevent battery drain.
-  - Thermal safeguards: Tier 1 (75°C `nice` +10), Tier 2 (80°C emergency suspend).
+  - Battery floor cutoff at <= 12% to prevent battery drain.
+  - Thermal safeguards: Tier 1 (88°C throttle warning), Tier 2 (95°C closed-lid emergency suspend).
 - **Zero Polling & Resource Constraints**: Built with pure async event loops (`notify` inotify + `zbus` D-Bus signals), guaranteeing 0.0% CPU when idle and < 8 MB RSS memory footprint.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 ```text
 .
 ├── Cargo.toml                 # Rust dependencies & binary targets
@@ -50,7 +51,7 @@ A high-performance, ultra-lightweight Ubuntu Top Bar (GNOME Shell 42) extension 
 
 ---
 
-## 🛠️ Build & Installation
+## Build & Installation
 
 ### Requirements
 - Ubuntu 22.04 LTS (GNOME Shell 42)

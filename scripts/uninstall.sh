@@ -8,7 +8,7 @@ BIN_DIR="$HOME/.local/bin"
 EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/$UUID"
 SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 
-echo "🛑 [Antigravity KeepAwake] Uninstalling..."
+echo "[Antigravity KeepAwake] Uninstalling..."
 
 # 1. Stop and disable systemd service
 if systemctl --user is-active --quiet antigravity-keepawake.service 2>/dev/null; then
@@ -33,4 +33,4 @@ rm -rf "$EXTENSION_DIR"
 # 3. Remove binary
 rm -f "$BIN_DIR/antigravity-keepawake"
 
-echo "✅ [Antigravity KeepAwake] Uninstallation complete."
+echo "[Antigravity KeepAwake] Uninstallation complete."
